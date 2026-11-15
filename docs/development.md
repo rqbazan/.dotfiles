@@ -101,6 +101,8 @@ mise -E personal dot status           # only the symlinks
   system where the tool allows it. Font: [JetBrains Mono](https://www.jetbrains.com/lp/mono/).
 - gitleaks runs before each commit and push (lefthook). `post-bootstrap.sh` installs the hooks; by hand:
   `mise exec lefthook -- lefthook install`.
+- Commit messages follow [Conventional Commits](https://www.conventionalcommits.org): `type(scope): summary`,
+  for example `feat(zsh): …`, `fix(install): …`, `test: …`, `docs: …`, `chore(deps): …`.
 
 ## Tests
 
@@ -115,6 +117,10 @@ mise run test:e2e    # the same with everything, then func/ and e2e/: the test t
 ```
 
 - `test:func` and `test:e2e` test both Macs, one after the other. `mise run test:func personal` tests one.
+- `--published` tests what a new Mac gets: the VM runs `curl -fsSL https://rcrd.space/mac/install.sh | bash`,
+  which clones GitHub's `main`, instead of your working tree (the suites still come from it). Run it after
+  pushing a change to `install.sh`, `post-bootstrap.sh` or `config/mise`, and before formatting a Mac.
+  `TEST_INSTALL_URL` points it elsewhere.
 - `--window` opens a window with the VM's desktop to watch it work; `--keep` leaves the VM running at the end.
   Without a window you can still look in with Screen Sharing: `open vnc://admin@<ip>` (password `admin`;
   `tart ip <vm>` gives the address).

@@ -7,6 +7,8 @@
 # Both take a profile (personal or work) to test only that Mac; `run.sh smoke` boots a VM and checks it's clean.
 # A suite named after a profile (func/personal.bats) runs only for that Mac.
 # --keep leaves the VM (and the snapshot it mounts) running; --window shows its desktop.
+# --published installs what a new Mac gets instead of this working tree: `curl -fsSL <TEST_INSTALL_URL> | bash`,
+# which clones GitHub's main. The suites still come from this working tree.
 # Each run leaves results/<date>-<mode>-<profile>/: report.html (open it), report.xml (JUnit) and the logs.
 # 1Password is faked: tests/mocks/1password serves a fake Connect server on this Mac, and the guest's
 # `op` reaches it through OP_CONNECT_HOST, so no real account or vault is involved.
@@ -20,6 +22,7 @@ REPO_DIR="$(cd "$HERE/.." && pwd)"
 MOCK_1PASSWORD="$HERE/mocks/1password"
 BASE_VM="${TEST_BASE_VM:-neo-base}" # tests/mise.toml sets it
 MOUNTS="/Volumes/My Shared Files"  # where Tart mounts --dir folders inside a macOS guest
+INSTALL_URL="${TEST_INSTALL_URL:-https://rcrd.space/mac/install.sh}" # what --published runs
 FAKE_1PASSWORD_PORT=4100
 FAKE_CONNECT_TOKEN="fake-connect-token"                 # the mock only checks that a bearer token is sent
 # What install.sh keeps in the guest's Keychain: as long as a real token (about 820 characters), so a step
@@ -31,7 +34,7 @@ die() { printf '\n\033[31m✗ %s\033[0m\n' "$1" >&2; exit 1; }
 # macOS has no `timeout`: perl's alarm ends the command after $1 seconds.
 with_timeout() { local secs="$1"; shift; perl -e 'alarm shift; exec @ARGV' "$secs" "$@"; }
 
-usage="usage: $0 smoke | func [personal|work] | e2e [personal|work]  [--keep] [--window]"
+usage="usage: $0 smoke | func [personal|work] | e2e [personal|work]  [--keep] [--window] [--published]"
 mode="${1:-}"
 [ $# -gt 0 ] && shift
 profile=""
@@ -50,11 +53,13 @@ case "$mode" in
     ;;
   *) die "$usage" ;;
 esac
-keep=false # --keep: leave the VM running at the end, to look around in it
+keep=false      # --keep: leave the VM running at the end, to look around in it
+published=false # --published: install from the URL a new Mac uses, not from this working tree
 graphics=(--no-graphics)
 for arg in "$@"; do
   case "$arg" in
     --keep) keep=true ;;
+    --published) published=true ;;
     --window) graphics=() ;; # open a window with the VM's desktop, to watch it work
     *) die "$usage" ;;
   esac
@@ -89,6 +94,7 @@ tart list --quiet | grep -x "$BASE_VM" >/dev/null || die "no $BASE_VM VM: from t
 
 stamp="$(date +%Y%m%d-%H%M%S)"
 name="$mode${profile:+-$profile}"
+$published && name="$name-published"
 vm="neo-$name-$stamp"
 results="$HERE/results/$stamp-$name"
 work="$(mktemp -d)"
@@ -212,6 +218,16 @@ OP_CONNECT_TOKEN=$FAKE_CONNECT_TOKEN \"$MOUNTS/bats/bin/bats\" --formatter prett
 --output \"$MOUNTS/results/$out\" ${files[*]}"
 }
 
+# Where install.sh comes from: the snapshot, which it also clones, or with --published the URL a new Mac uses
+# (install.sh then clones GitHub's main, its default).
+if $published; then
+  fetch="curl -fsSL $INSTALL_URL"
+  from_repo=""
+else
+  fetch="cat \"$MOUNTS/dotfiles/install.sh\""
+  from_repo="DOTFILES_REPO=\"$MOUNTS/dotfiles\""
+fi
+
 # install.sh piped into bash, as `curl … | bash` runs it, with a terminal (-tt) as a person has.
 # Each run leaves install-<n>.log, .exit and .seconds; a failure goes on to the tests, which report it.
 # Harness only:
@@ -222,10 +238,11 @@ OP_CONNECT_TOKEN=$FAKE_CONNECT_TOKEN \"$MOUNTS/bats/bin/bats\" --formatter prett
 install_run() {
   local n="$1" secs="$2" start=$SECONDS run_status
   say "install.sh, run $n (up to $((secs / 60)) min)"
+  $published && echo "from $INSTALL_URL"
   set +e
   with_timeout "$secs" ssh "${ssh_opts[@]}" -tt "admin@$ip" \
     "security unlock-keychain -p admin ~/Library/Keychains/login.keychain-db && \
-cat \"$MOUNTS/dotfiles/install.sh\" | DOTFILES_REPO=\"$MOUNTS/dotfiles\" DOTFILES_PROFILE=$profile \
+$fetch | $from_repo DOTFILES_PROFILE=$profile \
 DOTFILES_OP_TOKEN=$FAKE_SERVICE_ACCOUNT_TOKEN OP_CONNECT_HOST=$op_connect_host OP_CONNECT_TOKEN=$FAKE_CONNECT_TOKEN \
 MISE_SYSTEM_PACKAGES_MANAGERS=brew,brew-cask NONINTERACTIVE=1 bash -s -- ${install_args[*]:-}" 2>&1 |
     tee "$results/install-$n.log"
