@@ -1,0 +1,6 @@
+# Personal Mac only: linked to ~/.zshrc.local by config/mise/config.personal.toml.
+
+# variable
+command -v vland >/dev/null 2>&1 && eval "$(vland completion zsh 2>/dev/null)"
+
+export VIDRIERA_SERVER_URL=https://vidriera.localhost

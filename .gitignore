@@ -1,0 +1,8 @@
+.claude
+
+# per-machine choices (profile, local overrides): never shared
+config/mise/miserc.local.toml
+config/mise/*.local.toml
+
+# test runs' output (logs, JUnit reports); tests/mocks/* ignore their own node_modules
+tests/results/

@@ -1,0 +1,20 @@
+# A fake 1Password Connect server for the end-to-end test, built with emulate.
+# node and pnpm come from tests/mise.toml.
+[env]
+_.path = ["{{config_root}}/node_modules/.bin"]
+
+[tasks.install]
+description = "Install the mock's packages from the lockfile"
+run = "pnpm install --frozen-lockfile"
+
+[tasks.check]
+description = "Format, lint and types"
+run = "rr check"
+
+[tasks.test]
+description = "The mock's own tests"
+run = "rr test run"
+
+[tasks.start]
+description = "Serve the fake 1Password on 127.0.0.1:4100"
+run = "emulate start --config emulate.config.ts --port 4100"

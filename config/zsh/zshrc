@@ -1,0 +1,57 @@
+# Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
+# Initialization code that may require console input (password prompts, [y/n]
+# confirmations, etc.) must go above this block; everything else may go below.
+if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
+  source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
+fi
+
+# completions
+autoload -Uz compinit
+if [[ -n ~/.zcompdump(#qN.mh+24) ]]; then
+  compinit
+else
+  compinit -C
+fi
+
+# oh-my-zsh
+export ZSH="$HOME/.oh-my-zsh"
+ZSH_THEME="powerlevel10k/powerlevel10k"
+plugins=(git zsh-autosuggestions)
+# Only remind about updates, never prompt [Y/n]: the prompt swallowed the first key of
+# commands typed into fresh herdr panes (e.g. `herdr agent start` → "laude: command not found").
+zstyle ':omz:update' mode disabled
+source $ZSH/oh-my-zsh.sh
+
+# env
+export EDITOR="druk"
+export PATH="$PATH:$HOME/.local/bin"
+export XDG_CONFIG_HOME="$HOME/.config"
+# opencode
+export OPENCODE_INSTALL="$HOME/.opencode"
+export PATH="$OPENCODE_INSTALL/bin":$PATH
+# libpq
+export PATH="/opt/homebrew/opt/libpq/bin:$PATH"
+export LDFLAGS="-L/opt/homebrew/opt/libpq/lib"
+export CPPFLAGS="-I/opt/homebrew/opt/libpq/include"
+
+# binds
+bindkey "^[^[[C" forward-word
+bindkey "^[^[[D" backward-word
+
+# export env vars from .env script if it exists
+[[ -s "$HOME/.env" ]] && source "$HOME/.env"
+
+# mise
+eval "$(mise activate zsh)"
+
+# completions
+command -v opencode >/dev/null 2>&1 && eval "$(opencode --completions zsh 2>/dev/null)"
+
+# per-profile additions (config/zsh/zshrc.<profile>, linked by that profile)
+[[ -s "$HOME/.zshrc.local" ]] && source "$HOME/.zshrc.local"
+
+# To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
+[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+
+# druk
+export PATH="$HOME/.druk/bin:$PATH"

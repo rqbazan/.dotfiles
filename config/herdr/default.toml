@@ -1,0 +1,10 @@
+onboarding = false
+
+[ui.toast]
+delivery = "terminal"
+
+[ui]
+agent_panel_sort = "spaces"
+
+[keys]
+prefix = "ctrl+space"

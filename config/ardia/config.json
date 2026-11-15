@@ -1,0 +1,19 @@
+{
+  "settings": {
+    "addressBar": "sidebar",
+    "autoHideTabs": true,
+    "cleanUpInactiveTabsAfterMinutes": 10080,
+    "commandBarPlacement": "centred",
+    "extendWebsiteColor": false,
+    "glassTintAmount": 0.56,
+    "glassTintWithTheme": true,
+    "newTabLinksOpenIn": "tab",
+    "newTabOpens": "commandBar",
+    "peekLinksToOtherSites": false,
+    "profileSwitcherIcons": true,
+    "searchEngine": "duckduckgo",
+    "shareTabsAcrossWindows": true,
+    "showAdvancedSettings": true,
+    "sidebarWidth": 250
+  }
+}

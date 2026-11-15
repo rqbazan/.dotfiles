@@ -1,0 +1,4 @@
+font-size = 18
+font-family = "JetBrains Mono"
+theme = dark:Vesper,light:Ayu Light
+shell-integration-features = sudo

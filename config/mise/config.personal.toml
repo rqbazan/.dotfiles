@@ -1,0 +1,28 @@
+# Personal Mac only. Loaded when config/mise/miserc.local.toml says `env = ["personal"]`
+# (install.sh writes it once), or for one run with `mise -E personal bootstrap`.
+
+[bootstrap.packages]
+"brew-cask:gcloud-cli" = "latest"
+"brew-cask:zoom" = "latest"
+"brew-cask:cloudflare-warp" = "latest" # reaches the GCP databases through cloudflared
+
+[tools]
+pnpm = "12.16.1" # the version the vland repos pin (devEngines onFail: error)
+"npm:portless" = "0.17.0"
+"npm:@infisical/cli" = "0.44.1"
+"npm:heroui-cli" = "3.2.0"
+
+[settings]
+# read .nvmrc / .node-version and .terraform-version in projects
+idiomatic_version_file_enable_tools = ["node", "terraform"]
+
+[env]
+DOTFILES_PROFILE = "personal" # post-bootstrap.sh picks config/secrets/personal with it
+DOTFILES_OP_PROFILE_VAULT = { default = "rcrd-dotfiles" } # 1Password vault for this profile's secrets
+VLAND_CHECKOUTS = "{{env.HOME}}/Developer/variableland"
+VLAND_LAB_CHECKOUTS = "{{env.HOME}}/Developer/variablelab"
+
+[dotfiles]
+# pnpm's tokenHelper for the private @variableland registry (wired by scripts/post-bootstrap.sh)
+"~/.zshrc.local" = "~/.dotfiles/config/zsh/zshrc.personal"
+"~/.local/bin/vland-registry-token" = "~/.dotfiles/config/pnpm/vland-registry-token"

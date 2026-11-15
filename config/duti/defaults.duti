@@ -1,0 +1,31 @@
+# Default apps by file extension, in duti's own settings format: <bundle id> <extension or UTI> <role>.
+# Applied by scripts/post-bootstrap.sh with `duti config/duti/defaults.duti`. Check one with `duti -x tsx`.
+
+dev.zed.Zed .json all
+dev.zed.Zed .jsonc all
+dev.zed.Zed .ts all
+dev.zed.Zed .tsx all
+dev.zed.Zed .js all
+dev.zed.Zed .jsx all
+dev.zed.Zed .mjs all
+dev.zed.Zed .mts all
+dev.zed.Zed .cjs all
+dev.zed.Zed .css all
+dev.zed.Zed .scss all
+dev.zed.Zed .sass all
+dev.zed.Zed .less all
+dev.zed.Zed .xml all
+dev.zed.Zed .svg all
+dev.zed.Zed .yaml all
+dev.zed.Zed .yml all
+dev.zed.Zed .toml all
+dev.zed.Zed .md all
+dev.zed.Zed .mdx all
+dev.zed.Zed .sh all
+dev.zed.Zed .bash all
+dev.zed.Zed .zsh all
+dev.zed.Zed .fish all
+dev.zed.Zed .dockerfile all
+dev.zed.Zed .makefile all
+dev.zed.Zed .env all
+dev.zed.Zed .gitignore all

@@ -1,0 +1,29 @@
+{
+  "name": "mock-1password",
+  "private": true,
+  "description": "A fake 1Password Connect server for the end-to-end test, built with emulate",
+  "type": "module",
+  "devEngines": {
+    "packageManager": {
+      "name": "pnpm",
+      "version": "12.16.1",
+      "onFail": "error"
+    }
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.6.7",
+    "@rrlab/biome-config": "^0.1.0",
+    "@rrlab/biome-plugin": "^1.3.0",
+    "@rrlab/cli": "^1.7.2",
+    "@rrlab/oxc-plugin": "^1.3.0",
+    "@rrlab/ts-config": "^0.0.7",
+    "@rrlab/vitest-plugin": "^0.3.0",
+    "@types/node": "^26.6.6",
+    "emulate": "^0.13.1",
+    "oxfmt": "^0.75.0",
+    "oxlint": "^1.93.0",
+    "oxlint-tsgolint": "^7.0.2007",
+    "typescript": "^7.0.2",
+    "vitest": "^5.1.0"
+  }
+}

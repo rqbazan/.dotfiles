@@ -1,0 +1,105 @@
+# Global mise config AND the recipe for this Mac.
+# ~/.config/mise is a symlink to this folder (see install.sh), so:
+#   mise bootstrap --dry-run   preview
+#   mise bootstrap --update    git pull + apply
+# This file is the shared profile. config.work.toml and config.personal.toml add to it;
+# miserc.local.toml (per machine, not committed) says which one this Mac loads.
+
+[tools]
+bun = "1.4.4"
+node = "24.22.2"
+"npm:@antfu/ni" = "30.6.0"
+"npm:@variablelab/vland" = "0.4.2"
+usage = "3.5.5"
+"npm:skills" = "1.7.6"
+"npm:ctx7" = "0.11.0"
+hunk = "0.24.1"
+"npm:agent-browser" = "0.41.2"
+uv = "0.13.7"
+"pipx:claude-swap" = "1.0.0"
+terraform = "1.16.6"
+python = "3.13.17"
+lefthook = "2.2.2"
+gh = "2.103.3"
+lazygit = "0.66.3"
+gitleaks = "8.30.1"
+1password-cli = "2.42.0"
+# for the mas: entries below. mise applies packages before [tools], so on a new Mac
+# scripts/post-bootstrap.sh installs the App Store apps at the end of the same run.
+mas = "7.0.0"
+
+[settings]
+# every project lives under ~/Developer on both Macs (post-bootstrap.sh creates it)
+trusted_config_paths = ["~/Developer", "~/.herdr/worktrees", "~/.dotfiles"]
+
+# ── Packages ────────────────────────────────────────────────────────────────
+[bootstrap.brew]
+adopt = true # take over apps that were installed by hand, when identical
+
+[bootstrap.packages]
+# cli
+"brew:duti" = "latest"
+"brew:libpq" = "latest"
+# apps
+"brew-cask:raycast" = "latest"
+"brew-cask:ghostty" = "latest"
+"brew-cask:zed" = "latest"
+"brew-cask:yaak" = "latest"
+"brew-cask:proxyman" = "latest"
+"brew-cask:slack" = "latest"
+"brew-cask:datagrip" = "latest"
+"brew-cask:docker-desktop" = "latest"
+"brew-cask:1password" = "latest"
+"brew-cask:magpie" = "latest"
+"brew-cask:tailscale-app" = "latest"
+"brew-cask:hiddenbar" = "latest"
+"brew-cask:logi-options+" = "latest"
+"brew-cask:ardia" = "latest"
+# Mac App Store (needs the Apple Account signed in and the app already claimed)
+"mas:937984704" = "latest"  # Amphetamine
+"mas:6468120888" = "latest" # CleanMyKeyboard
+"mas:1351639930" = "latest" # Gifski
+# fonts
+"brew-cask:font-jetbrains-mono" = "latest"
+
+# ── macOS preferences (written like `defaults write`; Dock and Finder pick them up on relaunch) ──
+[bootstrap.macos.dock]
+autohide = true
+
+[bootstrap.macos.finder]
+preferred_view_style = "list"
+
+[bootstrap.macos.defaults]
+NSGlobalDomain = { "com.apple.swipescrolldirection" = false } # natural scrolling off
+"com.apple.screencapture" = { location = "~/Pictures/Screenshots" }
+
+# ── Shell framework (git checkouts, fast-forwarded by --update) ─────────────
+[bootstrap.repos]
+"~/.oh-my-zsh" = { url = "https://github.com/ohmyzsh/ohmyzsh.git" }
+"~/.oh-my-zsh/custom/themes/powerlevel10k" = { url = "https://github.com/romkatv/powerlevel10k.git" }
+"~/.oh-my-zsh/custom/plugins/zsh-autosuggestions" = { url = "https://github.com/zsh-users/zsh-autosuggestions.git" }
+
+# ── Dotfiles (symlinks into ~/.dotfiles: edit either side, commit here) ────────
+[dotfiles]
+"~/.zshrc" = "~/.dotfiles/config/zsh/zshrc"
+"~/.zprofile" = "~/.dotfiles/config/zsh/zprofile"
+"~/.p10k.zsh" = "~/.dotfiles/config/zsh/p10k.zsh"
+"~/.config/git/config" = "~/.dotfiles/config/git/config"
+"~/.config/git/ignore" = "~/.dotfiles/config/git/ignore"
+"~/.nirc" = "~/.dotfiles/config/ni/nirc"
+"~/.config/ghostty/config" = "~/.dotfiles/config/ghostty/config"
+"~/.config/herdr/config.toml" = "~/.dotfiles/config/herdr/default.toml"
+"~/.config/zed/settings.json" = "~/.dotfiles/config/zed/settings.json"
+"~/.config/hunk/config.toml" = "~/.dotfiles/config/hunk/config.toml"
+"~/.config/druk/config.json" = "~/.dotfiles/config/druk/config.json"
+"~/.config/ardia/config.json" = "~/.dotfiles/config/ardia/config.json" # Ardia reads it, never writes it
+# GitHub's host keys, so a new Mac doesn't ask to trust github.com. A block: ssh keeps adding its own lines.
+"~/.ssh/known_hosts/github" = { source = "~/.dotfiles/config/ssh/known_hosts.github", template = "tera", comment = "#" }
+# ~/.claude belongs to Claude Code: link the script and own only the statusLine key of its settings.
+"~/.claude/statusline.sh" = "~/.dotfiles/config/claude/statusline.sh"
+"~/.claude/settings.json/statusline" = { source = "~/.dotfiles/config/claude/settings.json", merge = true }
+
+# ── Things no package manager ships (runs on every bootstrap, idempotent) ───
+[tasks.bootstrap]
+description = "Install curl-only tools and other steps mise cannot declare"
+run = "~/.dotfiles/scripts/post-bootstrap.sh"

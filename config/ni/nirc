@@ -1,0 +1,3 @@
+defaultAgent=prompt
+globalAgent=bun
+catalog=false

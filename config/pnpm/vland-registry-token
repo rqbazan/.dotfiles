@@ -1,0 +1,7 @@
+#!/bin/sh
+# pnpm's tokenHelper for the private @variableland registry (Google Artifact Registry): prints a fresh gcloud
+# access token on every pnpm run, so none is stored. scripts/post-bootstrap.sh sets it in pnpm's auth.ini.
+# A file because pnpm takes only an absolute path with no arguments; gcloud by its full path because pnpm
+# may run where Homebrew isn't on PATH, such as from an editor.
+# ERR_PNPM_TOKEN_HELPER_ERROR_STATUS means gcloud's session ended: run `gcloud auth login`.
+exec /opt/homebrew/bin/gcloud auth print-access-token --quiet

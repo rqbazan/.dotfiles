@@ -1,0 +1,24 @@
+# Work Mac only. Loaded when config/mise/miserc.local.toml says `env = ["work"]`
+# (install.sh writes it once), or for one run with `mise -E work bootstrap`.
+
+[settings]
+# read .nvmrc / .node-version, .go-version, .terraform-version and .opentofu-version in projects
+idiomatic_version_file_enable_tools = ["node", "go", "terraform", "opentofu"]
+
+[env]
+DOTFILES_PROFILE = "work" # post-bootstrap.sh picks config/secrets/work with it
+DOTFILES_OP_PROFILE_VAULT = { default = "np-dotfiles" } # 1Password vault for this profile's secrets
+
+[bootstrap.packages]
+"brew-cask:microsoft-teams" = "latest"
+"brew-cask:windows-app" = "latest"
+"brew-cask:granola" = "latest"
+"brew-cask:aws-vpn-client" = "latest"
+
+[tools]
+awscli = "2.39.7"
+azure-cli = "2.92.0"
+go = "1.22.0"
+opentofu = "1.13.9"
+pnpm = "10.25.0"
+"npm:@variablelab/portless" = "0.0.6"

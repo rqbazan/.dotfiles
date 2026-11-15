@@ -1,0 +1,38 @@
+{
+  "vaults": [
+    {
+      "name": "dotfiles",
+      "items": [
+        {
+          "title": "context7",
+          "category": "API_CREDENTIAL",
+          "fields": [{ "label": "credential", "value": "fake-context7-api-key" }]
+        },
+        {
+          "title": "github",
+          "category": "SSH_KEY",
+          "sshKey": "ed25519"
+        }
+      ]
+    },
+    {
+      "name": "rcrd-dotfiles",
+      "items": [
+        {
+          "title": "npm",
+          "category": "API_CREDENTIAL",
+          "fields": [{ "label": "credential", "value": "fake-npm-token" }]
+        },
+        {
+          "title": "vland-registry",
+          "category": "SECURE_NOTE",
+          "fields": [{ "label": "url", "value": "registry.invalid/fake/npm" }]
+        }
+      ]
+    },
+    {
+      "name": "np-dotfiles",
+      "items": []
+    }
+  ]
+}

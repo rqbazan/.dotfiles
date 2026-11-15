@@ -1,0 +1,34 @@
+# This project's own mise file: its tasks and the tools they use. A Mac's config is config/mise, not this.
+#   mise run check       static checks, no VM: seconds
+#   mise run test:setup  once: the test tools, the base macOS VM (tens of GB), the fake 1Password's packages
+#   mise run test:func   install.sh on a throwaway VM without the apps, as each Mac: minutes
+#   mise run test:e2e    the same with everything: the test to pass before publishing
+# test:func and test:e2e take a profile (personal or work) to test one Mac, --keep and --window.
+min_version = "2026.10.19"
+
+[tools]
+shellcheck = "0.11.0"
+gitleaks = "8.30.1" # also what the git hooks run
+lefthook = "2.2.2" # installs the git hooks (.lefthook.yml)
+
+[tasks.check]
+description = "Static checks, no VM: config/mise parses as each Mac, shellcheck, gitleaks, the fake 1Password's checks"
+run = [
+  'for p in personal work; do MISE_CONFIG_DIR="$PWD/config/mise" mise -E "$p" config ls >/dev/null || exit 1; echo "✓ config/mise ($p)"; done',
+  "shellcheck install.sh scripts/post-bootstrap.sh config/claude/statusline.sh config/pnpm/vland-registry-token tests/run.sh tests/helpers.bash tests/*.bats tests/func/*.bats tests/e2e/*.bats && echo '✓ shellcheck'",
+  "gitleaks dir . --redact --no-banner",
+  "mise -C tests //mocks/1password:check",
+  "mise -C tests //mocks/1password:test",
+]
+
+[tasks."test:setup"]
+description = "Once: the test tools, the base macOS VM (tens of GB) and the fake 1Password's packages"
+run = "mise -C tests run setup"
+
+[tasks."test:func"]
+description = "Functional test: install.sh twice on a throwaway VM without the apps, as each Mac: minutes"
+run = "mise -C tests run func"
+
+[tasks."test:e2e"]
+description = "End-to-end test: install.sh twice on a throwaway VM with everything, as each Mac"
+run = "mise -C tests run e2e"

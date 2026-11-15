@@ -1,0 +1,48 @@
+# The tests: install.sh on a throwaway macOS VM (Tart), checked with bats. run.sh is the runner; the repo
+# root's mise.toml has the commands (mise run test:setup, test:func, test:e2e). The tools are pinned here.
+#   func/  suites for every run: what a Mac gets without the apps
+#   e2e/   suites only for e2e runs, which install the apps too
+# Also a mise monorepo for the fake services the VM talks to: mise //mocks/1password:start, …
+min_version = "2026.10.19"
+monorepo_root = true
+
+[monorepo]
+config_roots = ["mocks/1password"]
+
+[tools]
+tart = "2.41.1"
+bats = "1.14.0"
+"pipx:junit2html" = "31.1.4" # turns the JUnit report into report.html
+node = "24.22.2"
+pnpm = "12.16.1"
+
+[env]
+TEST_BASE_IMAGE = "ghcr.io/cirruslabs/macos-tahoe-vanilla:26.6.2" # a clean macOS, the same version as the Macs
+TEST_BASE_VM = "neo-base"                                         # the local VM every run clones
+
+[tasks.setup]
+description = "Install the tools, pull the base VM image and install the 1Password mock's packages"
+# The mock installs from its own folder: pnpm --dir can't read pnpm 12's two-document lockfile.
+run = ["mise install", "mise run image", "mise //mocks/1password:install"]
+
+[tasks.image]
+description = "Pull the base macOS image into a local VM, unless it's already there (tens of GB)"
+run = '''
+if tart list --quiet | grep -qx "$TEST_BASE_VM"; then
+  echo "✓ $TEST_BASE_VM is ready"
+else
+  tart clone "$TEST_BASE_IMAGE" "$TEST_BASE_VM"
+fi
+'''
+
+[tasks.smoke]
+description = "Boot a throwaway VM, reach it over SSH and check it's clean"
+run = "./run.sh smoke"
+
+[tasks.func]
+description = "Functional test: install.sh twice without the apps, as each Mac (or the profile given): minutes"
+run = "./run.sh func"
+
+[tasks.e2e]
+description = "End-to-end test: install.sh twice with everything, as each Mac (or the profile given)"
+run = "./run.sh e2e"

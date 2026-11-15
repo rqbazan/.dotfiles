@@ -1,0 +1,35 @@
+[core]
+    pager = hunk pager
+
+[merge]
+    conflictstyle = diff3
+
+[diff]
+    colorMoved = default
+
+[user]
+	name = Ricardo Q. Bazan
+	email = raquirozbazan@gmail.com
+
+[alias]
+    s = status
+    undo = reset HEAD~1 --mixed
+    co = checkout
+    cb = checkout -b
+	save = "!f() { git add -A && git commit -m \"${1:-wip}\"; }; f"
+    del = branch -D
+    pl = "!f() { git pull origin $(git symbolic-ref --short HEAD); }; f"
+    ps = "!f() { git push origin $(git symbolic-ref --short HEAD); }; f"
+    lg = log --graph --pretty=format:'%C(brightblack)%h%Creset %C(white)<%an>%Creset %C(yellow)(%cr)%Creset %C(cyan)%d%Creset %C(white)%s%Creset'
+    br = branch --sort=-committerdate
+[gpg]
+	format = ssh
+[commit]
+	gpgsign = true
+[init]
+	defaultBranch = main
+
+# Per-machine settings, not versioned: user.signingkey lives here
+# (scripts/post-bootstrap.sh creates it on first run).
+[include]
+	path = ~/.config/git/local
