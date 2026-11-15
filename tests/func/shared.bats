@@ -105,5 +105,5 @@ load ../helpers
 @test "nothing wrote into the repo" {
   run git -C ~/.dotfiles status --porcelain
   [ "$status" -eq 0 ]
-  [ -z "$output" ]
+  [ -z "$output" ] || { echo "$output"; git -C ~/.dotfiles diff | head -40; false; }
 }

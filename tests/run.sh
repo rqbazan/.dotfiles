@@ -266,9 +266,10 @@ if [ -n "$profile" ]; then
   # A settings.json Claude Code already wrote: the statusLine merge must keep what's in it.
   vm_ssh 'mkdir -p ~/.claude && printf "{\"keepMe\": true}\n" > ~/.claude/settings.json' && echo "✓ ~/.claude/settings.json"
   # Harness only: point mise's cache at the extra disk, which the guest mounted at boot. A real disk, unlike a
-  # shared folder, supports the file locks mise takes. Its root belongs to root, so it's handed to the user.
-  if vm_ssh '[ -d /Volumes/MiseCache ] && sudo chown admin /Volumes/MiseCache &&
-mkdir -p ~/Library/Caches && ln -s /Volumes/MiseCache ~/Library/Caches/mise && touch ~/Library/Caches/mise/.writable'; then
+  # shared folder, supports the file locks mise takes. Its root belongs to root, so it's handed to the user, and
+  # the cache is a folder in it: mise's cache pruning can't read the root's .Spotlight-V100.
+  if vm_ssh '[ -d /Volumes/MiseCache ] && sudo chown admin /Volumes/MiseCache && mkdir -p /Volumes/MiseCache/mise &&
+mkdir -p ~/Library/Caches && ln -s /Volumes/MiseCache/mise ~/Library/Caches/mise && touch ~/Library/Caches/mise/.writable'; then
     echo "✓ ~/Library/Caches/mise → its own 40 GB disk"
   else
     die "could not set up the disk for mise's cache"
