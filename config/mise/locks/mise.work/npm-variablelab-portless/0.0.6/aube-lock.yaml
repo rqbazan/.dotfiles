@@ -1,0 +1,25 @@
+lockfileVersion: '9.0'
+
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
+importers:
+
+  .:
+    dependencies:
+      '@variablelab/portless':
+        specifier: 0.0.6
+        version: 0.0.6
+
+packages:
+
+  '@variablelab/portless@0.0.6':
+    resolution: {integrity: sha512-ZWCEoKDAiGJ/oU8UoifgFQBTT8e4gvA7iDIIXUQ+W1UpKFAG68Goye//DJvnjcAlhYV8fhWyIInyOZNWB15RZg==}
+    engines: {node: '>=24'}
+    os: [darwin, linux, win32]
+    hasBin: true
+
+snapshots:
+
+  '@variablelab/portless@0.0.6': {}

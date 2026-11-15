@@ -1,10 +1,11 @@
 # This project's own mise file: its tasks and the tools they use. A Mac's config is config/mise, not this.
 #   mise run check       static checks, no VM: seconds
+#   mise run lock        after adding or bumping a tool in config/mise: its lockfiles, for both Macs
 #   mise run test:setup  once: the test tools, the base macOS VM (tens of GB), the fake 1Password's packages
 #   mise run test:func   install.sh on a throwaway VM without the apps, as each Mac: minutes
 #   mise run test:e2e    the same with everything: the test to pass before publishing
 # test:func and test:e2e take a profile (personal or work) to test one Mac, --keep and --window.
-min_version = "2026.10.19"
+min_version = "2026.11.8"
 
 [tools]
 shellcheck = "0.11.0"
@@ -20,6 +21,11 @@ run = [
   "mise -C tests //mocks/1password:check",
   "mise -C tests //mocks/1password:test",
 ]
+
+[tasks.lock]
+description = "Lock config/mise's tools (URL and checksum) for both Macs; commit the lockfiles with the change"
+# On a Mac set up from this repo: the pipx tools' dependencies are resolved with config/mise's python.
+run = 'for p in personal work; do MISE_CONFIG_DIR="$PWD/config/mise" mise -E "$p" lock --global --platform macos-arm64 || exit 1; done'
 
 [tasks."test:setup"]
 description = "Once: the test tools, the base macOS VM (tens of GB) and the fake 1Password's packages"

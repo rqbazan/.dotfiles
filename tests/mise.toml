@@ -3,7 +3,7 @@
 #   func/  suites for every run: what a Mac gets without the apps
 #   e2e/   suites only for e2e runs, which install the apps too
 # Also a mise monorepo for the fake services the VM talks to: mise //mocks/1password:start, …
-min_version = "2026.10.19"
+min_version = "2026.11.8"
 monorepo_root = true
 
 [monorepo]

@@ -23,11 +23,12 @@ OP_KEYCHAIN_ITEM="${DOTFILES_OP_KEYCHAIN_ITEM:-dotfiles-op}" # scripts/post-boot
 say() { printf '\n\033[1m%s\033[0m\n' "$1"; }
 die() { printf '\n\033[31m✗ %s\033[0m\n' "$1" >&2; exit 1; }
 
-# `mise bootstrap --config-dir` arrived in mise 2026.10.21.
+# The same as min_version in config/mise/config.toml: its lockfiles need it.
+MISE_MIN_VERSION="2026.11.8"
 mise_is_recent() {
-  local help
-  help="$(mise bootstrap --help 2>/dev/null)" || return 1
-  case "$help" in *--config-dir*) return 0 ;; *) return 1 ;; esac
+  local version
+  version="$(mise --version 2>/dev/null | awk '{print $1}')" && [ -n "$version" ] || return 1
+  [ "$(printf '%s\n%s\n' "$MISE_MIN_VERSION" "$version" | sort -V | head -1)" = "$MISE_MIN_VERSION" ]
 }
 
 [ "$(uname -s)" = "Darwin" ] || die "macOS only"
@@ -51,7 +52,7 @@ command -v mise >/dev/null 2>&1 || curl -fsSL https://mise.run | sh
 if ! mise_is_recent; then
   echo "mise $(mise --version 2>/dev/null | awk '{print $1}') is too old for this setup; updating it"
   mise self-update --yes </dev/null || true
-  mise_is_recent || die "mise is still too old (2026.10.21 or newer is needed). Update it by hand (mise self-update, or brew upgrade mise) and run this again."
+  mise_is_recent || die "mise is still too old ($MISE_MIN_VERSION or newer is needed). Update it by hand (mise self-update, or brew upgrade mise) and run this again."
 fi
 mise --version
 

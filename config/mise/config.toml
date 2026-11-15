@@ -5,6 +5,9 @@
 # This file is the shared profile. config.work.toml and config.personal.toml add to it;
 # miserc.local.toml (per machine, not committed) says which one this Mac loads.
 
+# This folder's lockfiles and `mise lock` with [tool_config] locked need it; install.sh updates mise to it.
+min_version = "2026.11.8"
+
 [tools]
 bun = "1.4.4"
 node = "24.22.2"
@@ -32,6 +35,12 @@ gitleaks = "8.30.1"
 # for the mas: entries below. mise applies packages before [tools], so on a new Mac
 # scripts/post-bootstrap.sh installs the App Store apps at the end of the same run.
 mas = "7.0.0"
+
+# Install this config's tools only as its lockfiles record them: URL and checksum (mise.lock, and
+# mise.<profile>.lock for config.<profile>.toml). After adding or bumping one: `mise run lock` in the repo.
+# Only these tools: projects and `mise exec <tool>` keep their own policy.
+[tool_config]
+locked = true
 
 [env]
 # Claude Code's own variables: its version is the one in [tools], so it never updates itself (not even

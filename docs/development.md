@@ -12,7 +12,7 @@ steps on a Mac, see the [runbook](runbook.md).
 | What | Declared in | Applied by |
 | --- | --- | --- |
 | Apps, fonts and a few CLIs (Homebrew), App Store apps (mas) | `[bootstrap.packages]` | `mise bootstrap` |
-| Runtimes and CLIs, at pinned versions | `[tools]` | `mise bootstrap` |
+| Runtimes and CLIs, at pinned versions, checked against the lockfiles | `[tools]` | `mise bootstrap` |
 | macOS settings (Dock, Finder, `defaults`) | `[bootstrap.macos.*]` | `mise bootstrap` |
 | oh-my-zsh, powerlevel10k, zsh-autosuggestions | `[bootstrap.repos]` | `mise bootstrap` |
 | Config files, symlinked into `~` | `[dotfiles]` | `mise bootstrap`, `mise dot apply` |
@@ -27,10 +27,11 @@ steps on a Mac, see the [runbook](runbook.md).
 | `config/mise/config.toml` | the shared recipe |
 | `config/mise/config.{work,personal}.toml` | each profile's packages, tools, settings, `DOTFILES_PROFILE` and 1Password vault |
 | `config/mise/miserc.local.toml` | this Mac's profile; written by `install.sh`, not committed |
+| `config/mise/mise.lock`, `mise.{work,personal}.lock`, `locks/` | each tool's URL and checksum, and the npm and pipx tools' dependencies; written by `mise run lock`, never by hand |
 | `config/<tool>/` | config files, symlinked into `~` |
 | `config/secrets/{shared,<profile>}/<name>.tpl` | templates of secret files: `op://` references, never values |
 | `scripts/post-bootstrap.sh` | what mise can't declare |
-| `mise.toml` | the project's tasks (`check`, `test:*`) and the tools they use |
+| `mise.toml` | the project's tasks (`check`, `lock`, `test:*`) and the tools they use |
 | `tests/` | the VM tests and their fake services |
 
 ## Make a change
@@ -38,7 +39,7 @@ steps on a Mac, see the [runbook](runbook.md).
 | To add | Do |
 | --- | --- |
 | a Homebrew package or cask | `mise bootstrap packages use brew:<name>` (or `brew-cask:<name>`); stays `latest` |
-| a tool | `mise use -g <tool>@<version>`, always exact; a profile-only tool goes in `config.<profile>.toml` |
+| a tool, or a new version | write it in `config.toml`, always exact (a profile-only tool in `config.<profile>.toml`); `mise run lock`; `mise bootstrap`, which also pins an npm package's provenance in the lockfile; commit the lockfiles with it. Before `mise run lock`, mise refuses to install it, `mise use -g` too |
 | a config file | move it into `config/<tool>/` and add a line under `[dotfiles]` |
 | a secret | see [Secrets](#secrets) |
 | a step in `post-bootstrap.sh` | safe to repeat; report failures with `warn` (the script always exits 0); run tools with `mise exec <tool> --`; never export `op_token` |
@@ -96,7 +97,8 @@ mise -E personal dot status           # only the symlinks
 
 ## Conventions
 
-- Everything mise can install goes through mise, at an exact version. Homebrew can't pin: `latest`.
+- Everything mise can install goes through mise, at an exact version, and installs only what the lockfiles
+  record (`[tool_config] locked`). Homebrew can't pin: `latest`.
 - Theme: [Vesper](https://github.com/raunofreiberg/vesper) in dark mode, Ayu Light in light mode, following the
   system where the tool allows it. Font: [JetBrains Mono](https://www.jetbrains.com/lp/mono/).
 - gitleaks runs before each commit and push (lefthook). `post-bootstrap.sh` installs the hooks; by hand:
