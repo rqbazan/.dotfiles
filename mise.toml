@@ -24,8 +24,9 @@ run = [
 
 [tasks.lock]
 description = "Lock config/mise's tools (URL and checksum) for both Macs; commit the lockfiles with the change"
-# On a Mac set up from this repo: the pipx tools' dependencies are resolved with config/mise's python.
-run = 'for p in personal work; do MISE_CONFIG_DIR="$PWD/config/mise" mise -E "$p" lock --global --platform macos-arm64 || exit 1; done'
+# On a Mac set up from this repo: the pipx tools' dependencies are resolved with config/mise's python. No
+# auto-install, or a shim of a tool this Mac lacks installs it, or waits for an answer, in the middle of the run.
+run = 'for p in personal work; do MISE_CONFIG_DIR="$PWD/config/mise" MISE_AUTO_INSTALL=false MISE_EXEC_AUTO_INSTALL=false mise -E "$p" lock --global --platform macos-arm64 || exit 1; done'
 
 [tasks."test:setup"]
 description = "Once: the test tools, the base macOS VM (tens of GB) and the fake 1Password's packages"
