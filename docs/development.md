@@ -100,7 +100,9 @@ mise -E personal dot status           # only the symlinks
 - Theme: [Vesper](https://github.com/raunofreiberg/vesper) in dark mode, Ayu Light in light mode, following the
   system where the tool allows it. Font: [JetBrains Mono](https://www.jetbrains.com/lp/mono/).
 - gitleaks runs before each commit and push (lefthook). `post-bootstrap.sh` installs the hooks; by hand:
-  `mise exec lefthook -- lefthook install`.
+  `mise exec lefthook -- lefthook install`. GitHub runs `mise run check` on each push to `main` and each pull
+  request (`.github/workflows/check.yml`), and its ruleset only takes signed commits on `main`, never a force
+  push. Actions are pinned by commit SHA.
 - Commit messages follow [Conventional Commits](https://www.conventionalcommits.org): `type(scope): summary`,
   for example `feat(zsh): …`, `fix(install): …`, `test: …`, `docs: …`, `chore(deps): …`.
 

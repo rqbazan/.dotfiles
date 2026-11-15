@@ -1,0 +1,23 @@
+# mise run check on every push to main and every pull request: what the git hooks and a person run locally,
+# also for a push made without them. The VM tests (mise run test:func, test:e2e) stay local: they need
+# nested virtualization, which GitHub's runners don't offer.
+name: check
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: jdx/mise-action@d5574b52816a478f9d4e6529a3f6ff17a8a36785 # v5.2.8
+      - run: mise -C tests //mocks/1password:install
+      - run: mise run check
