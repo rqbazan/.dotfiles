@@ -67,6 +67,7 @@ load ../helpers
 }
 
 @test "the GitHub SSH key comes from 1Password, and git signs with it" {
+  [ "$(stat -f %Lp ~/.ssh)" = 700 ]
   private ~/.ssh/id_ed25519
   [ "$(ssh-keygen -y -f ~/.ssh/id_ed25519 | cut -d' ' -f1-2)" = "$(cut -d' ' -f1-2 ~/.ssh/id_ed25519.pub)" ]
   [ "$(git config --get user.signingkey)" = "$HOME/.ssh/id_ed25519.pub" ]
