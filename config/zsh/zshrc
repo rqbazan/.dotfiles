@@ -26,9 +26,6 @@ source $ZSH/oh-my-zsh.sh
 export EDITOR="druk"
 export PATH="$PATH:$HOME/.local/bin"
 export XDG_CONFIG_HOME="$HOME/.config"
-# opencode
-export OPENCODE_INSTALL="$HOME/.opencode"
-export PATH="$OPENCODE_INSTALL/bin":$PATH
 # libpq
 export PATH="/opt/homebrew/opt/libpq/bin:$PATH"
 export LDFLAGS="-L/opt/homebrew/opt/libpq/lib"
@@ -52,6 +49,3 @@ command -v opencode >/dev/null 2>&1 && eval "$(opencode --completions zsh 2>/dev
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
-
-# druk
-export PATH="$HOME/.druk/bin:$PATH"

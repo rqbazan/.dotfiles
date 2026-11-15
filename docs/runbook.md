@@ -53,10 +53,9 @@ When it ends, read the list under "step(s) need attention" (see [Warnings](#warn
 | no 1Password token in the Keychain | run the install command again and paste the token |
 | could not save the token in the Keychain | run the install command again |
 | `~/.<name>` was not written | a 1Password item a template names is missing (see [Secrets](#change-or-add-a-secret)) |
-| `<tool>` was not installed | usually the network: `mise run bootstrap` |
 | druk theme was not installed | `mise run bootstrap`, or install it from druk's extensions panel |
 
-`mise run bootstrap` repeats only the last steps (curl-only tools, secrets, App Store apps); the install
+`mise run bootstrap` repeats only the last steps (secrets, druk's themes, App Store apps); the install
 command, or `mise bootstrap --update`, repeats everything. Both are safe to run again.
 
 **If an app fails to install, nothing after the apps runs:** no config files, tools or secrets. That's how

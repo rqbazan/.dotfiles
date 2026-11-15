@@ -6,7 +6,7 @@
 set -uo pipefail
 
 DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-export PATH="$HOME/.local/bin:$HOME/.opencode/bin:$HOME/.druk/bin:$PATH"
+export PATH="$HOME/.local/bin:$PATH"
 
 failed=()
 warn() { failed+=("$1"); echo "! $1"; }
@@ -94,28 +94,6 @@ if mise which mas >/dev/null 2>&1; then
 else
   warn "mas is missing: App Store apps not installed"
 fi
-
-# name | installer (each vendor's official one)
-while IFS='|' read -r cmd url; do
-  if command -v "$cmd" >/dev/null 2>&1; then
-    echo "✓ $cmd"
-  else
-    echo "→ installing $cmd"
-    # Download first, so a failed download never runs half a script. Output through a pipe: druk's installer
-    # opens /dev/tty when stdout is a terminal, and mise's bootstrap task has no terminal to open.
-    if script="$(curl -fsSL --retry 2 "$url")" && bash -c "$script" </dev/null | cat; then
-      echo "✓ $cmd"
-    else
-      warn "$cmd was not installed ($url); run this again later with: mise run bootstrap"
-    fi
-  fi
-done <<'TOOLS'
-herdr|https://herdr.dev/install.sh
-claude|https://claude.ai/install.sh
-opencode|https://opencode.ai/install
-druk|https://druk.letstri.dev/install
-pi|https://pi.dev/install.sh
-TOOLS
 
 # druk's colour themes are extensions: its app installs one by fetching <id>/extension.json from
 # druk's registry into ~/.config/druk/extensions. Same here for the two config/druk/config.json uses.

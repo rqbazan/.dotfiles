@@ -16,7 +16,7 @@ steps on a Mac, see the [runbook](runbook.md).
 | macOS settings (Dock, Finder, `defaults`) | `[bootstrap.macos.*]` | `mise bootstrap` |
 | oh-my-zsh, powerlevel10k, zsh-autosuggestions | `[bootstrap.repos]` | `mise bootstrap` |
 | Config files, symlinked into `~` | `[dotfiles]` | `mise bootstrap`, `mise dot apply` |
-| Curl-only tools, druk's themes, secrets, App Store apps on a new Mac | `scripts/post-bootstrap.sh` | `[tasks.bootstrap]`, at the end |
+| Secrets, druk's themes, App Store apps on a new Mac | `scripts/post-bootstrap.sh` | `[tasks.bootstrap]`, at the end |
 | What only one Mac gets | `config.<profile>.toml` | when that profile is active |
 
 ## Layout

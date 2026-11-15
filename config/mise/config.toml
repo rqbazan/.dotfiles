@@ -15,6 +15,11 @@ usage = "3.5.5"
 "npm:ctx7" = "0.11.0"
 hunk = "0.24.1"
 "npm:agent-browser" = "0.41.2"
+claude = "2.1.325" # Claude Code; it never updates itself (see [env]): bump it here
+"aqua:anomalyco/opencode" = "2.3.0" # the binary; the registry's plain "opencode" is the npm package
+pi = "1.5.2"
+herdr = "0.9.5"
+"github:letstri/druk" = "1.40.1"
 uv = "0.13.7"
 "pipx:claude-swap" = "1.0.0"
 terraform = "1.16.6"
@@ -27,6 +32,12 @@ gitleaks = "8.30.1"
 # for the mas: entries below. mise applies packages before [tools], so on a new Mac
 # scripts/post-bootstrap.sh installs the App Store apps at the end of the same run.
 mas = "7.0.0"
+
+[env]
+# Claude Code's own variables: its version is the one in [tools], so it never updates itself (not even
+# `claude update`); its plugins still do.
+DISABLE_UPDATES = "1"
+FORCE_AUTOUPDATE_PLUGINS = "1"
 
 [settings]
 # every project lives under ~/Developer on both Macs (post-bootstrap.sh creates it)
@@ -99,7 +110,7 @@ NSGlobalDomain = { "com.apple.swipescrolldirection" = false } # natural scrollin
 "~/.claude/statusline.sh" = "~/.dotfiles/config/claude/statusline.sh"
 "~/.claude/settings.json/statusline" = { source = "~/.dotfiles/config/claude/settings.json", merge = true }
 
-# ── Things no package manager ships (runs on every bootstrap, idempotent) ───
+# ── What mise can't declare (runs on every bootstrap, idempotent) ───────────
 [tasks.bootstrap]
-description = "Install curl-only tools and other steps mise cannot declare"
+description = "Secrets, druk's themes, App Store apps on a new Mac and other steps mise cannot declare"
 run = "~/.dotfiles/scripts/post-bootstrap.sh"
