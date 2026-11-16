@@ -1,5 +1,10 @@
 # dotfiles
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset=".github/readme/banner-dark.svg">
+  <img src=".github/readme/banner-light.svg" alt="RCRD, the banner install.sh prints">
+</picture>
+
 My Mac, declared. One command sets up a new machine and brings an existing one up to date.
 
 ## Set up a Mac
@@ -17,7 +22,8 @@ My Mac, declared. One command sets up a new machine and brings an existing one u
    SSH key. Not at hand? Press Enter: the rest installs, and the next run asks again.
 4. Do the few steps no script can: [runbook](docs/runbook.md).
 
-Running the same command again is how a Mac stays up to date.
+Running the same command again is how a Mac stays up to date. Its options and variables:
+`curl -fsSL https://rcrd.space/mac/install.sh | bash -s -- --help`.
 
 ## Built on
 
