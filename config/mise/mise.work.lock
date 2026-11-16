@@ -36,6 +36,9 @@ aube = { path = "locks/mise.work/npm-variablelab-portless/0.0.6", digest = "sha2
 backend = "npm:@variablelab/portless"
 specifiers = ["0.0.6"]
 
+[tools."npm:@variablelab/portless".provenance]
+repository = "github.com/withvariablelab/portless"
+
 [[tools.opentofu]]
 version = "1.13.9"
 backend = "aqua:opentofu/opentofu"
