@@ -147,7 +147,7 @@ mise run test:e2e    # the same with everything, then func/ and e2e/: the test t
 2. Clones the base VM, boots it without a window, and mounts the copy and bats read-only and the results
    folder writable.
 3. Reaches it over SSH with the image's default password (`SSH_ASKPASS`), without touching `~/.ssh`.
-4. Starts the fake 1Password on this Mac, on the address the VM sees it at.
+4. Starts the fake 1Password on this Mac, on the address the VM sees it at and the first free port from 4100.
 5. Checks the VM is clean (`smoke.bats`), then runs `install.sh` twice, piped into bash as `curl | bash`
    does, under time limits (100 and 40 minutes). `func` passes it `--skip packages`.
 6. Runs the suites inside the VM in one go (`func/`, plus `e2e/` on e2e runs), then deletes the VM.
@@ -193,9 +193,27 @@ OP_CONNECT_HOST=http://127.0.0.1:4100 OP_CONNECT_TOKEN=x op read op://rcrd-dotfi
 ### Disk
 
 - The base VM takes about 28 GB; `tart delete neo-base` removes it (`mise run test:setup` pulls it again).
+  Only when no run is going: every run clones it.
 - A profile run takes about 20 GB more while it runs (the VM's copy and the cache disk) and frees it at the end.
   With `--keep`, they stay until you delete the VM.
-- `tart prune --entries=caches --older-than=0` drops Tart's cached images.
+- `tart prune --entries=caches --older-than=0` drops Tart's downloaded images, and nothing else.
+  `--entries=vms` deletes local VMs instead: neo-base and the ones other runs are using.
+
+### Runs at the same time
+
+Two runs, from two worktrees or two sessions, can share this Mac, within these limits:
+
+- macOS runs at most two macOS VMs at once. `run.sh` counts the running ones before it clones, and stops while
+  two run; a third that starts anyway (two runs started together) gets no IP.
+- Each run serves its own fake 1Password, with its own worktree's fixtures and SSH key, on the first free port
+  from 4100. Its `emulate.log` shows the ports it found taken and the one it got.
+- The two VMs share the CPU and disk: the second install's time limit (`idempotency.bats`) can fail from that
+  alone. Rerun it alone before reading it as a regression.
+- A run copies the working tree when it starts: later edits aren't in it. Don't edit `tests/run.sh` while a run
+  from the same checkout is going: bash reads a script as it runs it.
+- A new worktree needs the mock's packages once, or `mise run check` and `run.sh` stop at the mock:
+  `mise -C tests //mocks/1password:install`.
+- Delete a VM only if it's yours (its name ends with your run's stamp).
 
 ## Publishing
 
