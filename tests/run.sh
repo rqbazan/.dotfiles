@@ -23,7 +23,8 @@ MOCK_1PASSWORD="$HERE/mocks/1password"
 BASE_VM="${TEST_BASE_VM:-neo-base}" # tests/mise.toml sets it
 MOUNTS="/Volumes/My Shared Files"  # where Tart mounts --dir folders inside a macOS guest
 INSTALL_URL="${TEST_INSTALL_URL:-https://rcrd.space/mac/install.sh}" # what --published runs
-FAKE_1PASSWORD_PORT=4100
+FAKE_1PASSWORD_PORT_FIRST=4100 # each run serves its own fake 1Password, on the first port free from here
+FAKE_1PASSWORD_PORT_LAST=4109
 FAKE_CONNECT_TOKEN="fake-connect-token"                 # the mock only checks that a bearer token is sent
 # What install.sh keeps in the guest's Keychain: as long as a real token (about 820 characters), so a step
 # that cuts it short shows. The mock ignores it: with OP_CONNECT_HOST set, op talks to the mock instead.
@@ -154,6 +155,17 @@ ssh_opts=(-F /dev/null -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/nu
 vm_ssh() { ssh "${ssh_opts[@]}" "admin@$ip" "$@"; }
 
 say "Boot $vm"
+# macOS runs at most two macOS VMs at once, and a third one never gets an IP: stop here instead.
+running_macos=0
+running_names=""
+for each in $(tart list --source local | awk 'NR > 1 && $NF == "running" {print $2}'); do
+  if tart get "$each" --format json 2>/dev/null | grep -E '"OS" *: *"darwin"' >/dev/null; then
+    running_macos=$((running_macos + 1))
+    running_names="${running_names:+$running_names, }$each"
+  fi
+done
+[ "$running_macos" -lt 2 ] ||
+  die "two macOS VMs are running already ($running_names), and macOS runs at most two: wait for one to end (tart list)"
 tart clone "$BASE_VM" "$vm"
 # Profile runs give mise's cache a disk of its own: the app installers it keeps (about 6 GB) would fill the
 # base image's 18 GB free. A sparse image takes only what's written, and goes away with the VM.
@@ -177,7 +189,8 @@ tart run ${graphics[@]+"${graphics[@]}"} \
   ${extra_disk[@]+"${extra_disk[@]}"} \
   "$vm" >"$results/tart-run.log" 2>&1 &
 tart_pid=$!
-ip="$(tart ip --wait 180 "$vm")" || die "the VM got no IP in 180s (see $results/tart-run.log)"
+ip="$(tart ip --wait 180 "$vm")" ||
+  die "the VM got no IP in 180s (see $results/tart-run.log; is it a third macOS VM? tart list)"
 echo "✓ ip $ip"
 
 say "SSH"
@@ -193,16 +206,43 @@ vm_ssh 'echo "macOS $(sw_vers -productVersion)"; xcode-select -p 2>&1 | sed "s/^
 # Listen only on the address the guest sees this Mac at (its default gateway on Tart's network),
 # not on every interface. node is exec'd directly so that stopping it stops the server (npx, pnpm and
 # mise exec would each leave it running as a child).
+# Every run serves its own, on the first free port: another run at the same time holds its own, which has that
+# worktree's fixtures and goes away when that run ends. A port is taken when emulate exits instead of saying
+# "Ready."; each try appends to emulate.log.
 say "Fake 1Password"
 # shellcheck disable=SC2016 # expands in the guest
 host_ip="$(vm_ssh 'route -n get default | awk "/gateway/ {print \$2}"')"
 [ -n "$host_ip" ] || die "could not find this Mac's address on the VM network"
-(cd "$MOCK_1PASSWORD" && exec "$mock_node" node_modules/emulate/dist/index.js start --config emulate.config.ts \
-  --host "$host_ip" --port "$FAKE_1PASSWORD_PORT") >"$results/emulate.log" 2>&1 &
-emulate_pid=$!
-op_connect_host="http://$host_ip:$FAKE_1PASSWORD_PORT"
+fake_1password_port=""
+for port in $(seq "$FAKE_1PASSWORD_PORT_FIRST" "$FAKE_1PASSWORD_PORT_LAST"); do
+  (cd "$MOCK_1PASSWORD" && exec "$mock_node" node_modules/emulate/dist/index.js start --config emulate.config.ts \
+    --host "$host_ip" --port "$port") >>"$results/emulate.log" 2>&1 &
+  emulate_pid=$!
+  for _ in $(seq 1 120); do # up to a minute
+    grep -qs 'Ready\.$' "$results/emulate.log" && break
+    kill -0 "$emulate_pid" 2>/dev/null || break
+    sleep 0.5
+  done
+  if grep -qs 'Ready\.$' "$results/emulate.log"; then
+    fake_1password_port="$port"
+    break
+  fi
+  if kill -0 "$emulate_pid" 2>/dev/null; then
+    die "the fake 1Password server did not start in a minute (see $results/emulate.log)"
+  fi
+  wait "$emulate_pid" 2>/dev/null || true
+  emulate_pid=""
+  grep -q "on port $port: listen EADDRINUSE" "$results/emulate.log" ||
+    die "the fake 1Password server did not start (see $results/emulate.log)"
+  echo "port $port is taken, maybe by another run"
+done
+[ -n "$fake_1password_port" ] ||
+  die "no free port for the fake 1Password from $FAKE_1PASSWORD_PORT_FIRST to $FAKE_1PASSWORD_PORT_LAST"
+op_connect_host="http://$host_ip:$fake_1password_port"
 curl -fs --retry 20 --retry-connrefused --retry-delay 1 "$op_connect_host/heartbeat" >/dev/null ||
   die "the fake 1Password server did not start (see $results/emulate.log)"
+# The heartbeat must have come from this run's server: still running, it holds the port.
+kill -0 "$emulate_pid" 2>/dev/null || die "the fake 1Password server stopped (see $results/emulate.log)"
 echo "✓ $op_connect_host"
 
 # Runs the given suites (paths relative to tests/) inside the guest, in one bats call: one JUnit report in <out>.

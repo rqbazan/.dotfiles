@@ -11,3 +11,14 @@ How the repo works, its layout and conventions: [docs/development.md](docs/devel
 - Verify every change with `mise run check`; one to `install.sh`, `scripts/` or `config/mise` also with
   `mise run test:func personal`. Delete the VMs that `--keep` leaves.
 - Commit and push only when asked.
+
+Other sessions may be working on this repo, and testing on this Mac, at the same time:
+
+- Work in a worktree of your own. A test run copies the working tree as it is, untracked files included, so a
+  run from a shared checkout tests what another session has half-written.
+- Delete only your own VMs, by their exact name (`neo-<mode>-<profile>-<stamp>`). Never `tart delete neo-base`
+  or `tart prune --entries=vms`: every run clones neo-base, and pulling it again takes ~28 GB.
+- macOS runs at most two macOS VMs at once, and `mise run test:*` stops while two run: check `tart list` first,
+  and agree on turns with the other sessions.
+- Only one session runs `mise run lock` at a time: it rewrites every lockfile.
+- The Bash tool runs zsh: run bash code with `/bin/bash`, which is 3.2, as `curl | bash` gets on a new Mac.
